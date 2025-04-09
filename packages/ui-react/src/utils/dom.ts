@@ -19,6 +19,8 @@ export default function scrollbarSize(recalc?: boolean) {
   return size;
 }
 
+export const getScrollParent = () => (document.scrollingElement || document.body) as HTMLElement;
+
 export const addScript = (src: string): Promise<void> => {
   return new Promise((resolve) => {
     const script: HTMLScriptElement = document.createElement('script');
@@ -32,4 +34,14 @@ export const addScript = (src: string): Promise<void> => {
     };
     document.body.appendChild(script);
   });
+};
+
+export const injectScript = (script: string) => {
+  if (!script) return;
+
+  const scriptElement = document.createElement('script');
+  scriptElement.type = 'text/javascript';
+  scriptElement.textContent = script;
+
+  document.head.appendChild(scriptElement);
 };

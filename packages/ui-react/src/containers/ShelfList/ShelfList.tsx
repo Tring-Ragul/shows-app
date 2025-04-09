@@ -7,10 +7,10 @@ import type { Content } from '@jwp/ott-common/types/config';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
 import { useWatchHistoryStore } from '@jwp/ott-common/src/stores/WatchHistoryStore';
-import { slugify } from '@jwp/ott-common/src/utils/urlFormatting';
+import { mediaURL, slugify } from '@jwp/ott-common/src/utils/urlFormatting';
 import { parseAspectRatio, parseTilesDelta } from '@jwp/ott-common/src/utils/collection';
 import { testId } from '@jwp/ott-common/src/utils/common';
-import { PersonalShelf, SHELF_LAYOUT_TYPE } from '@jwp/ott-common/src/constants';
+import { PersonalShelf, SHELF_LAYOUT_TYPE, PLAYLIST_LIMIT_MAX } from '@jwp/ott-common/src/constants';
 import usePlaylists from '@jwp/ott-hooks-react/src/usePlaylists';
 import { useTranslationKey } from '@jwp/ott-hooks-react/src/useTranslationKey';
 
@@ -19,6 +19,8 @@ import InfiniteScrollLoader from '../../components/InfiniteScrollLoader/Infinite
 import ErrorPage from '../../components/ErrorPage/ErrorPage';
 import Fade from '../../components/Animation/Fade/Fade';
 import HeroShelf from '../../components/HeroShelf/HeroShelf';
+import { getScrollParent } from '../../utils/dom';
+import CardGrid from '../../components/CardGrid/CardGrid';
 
 import styles from './ShelfList.module.scss';
 
@@ -41,8 +43,8 @@ const ShelfList = ({ rows }: Props) => {
   const { user, subscription } = useAccountStore(({ user, subscription }) => ({ user, subscription }), shallow);
 
   // Todo: move to more common package?
-
-  const playlists = usePlaylists(rows, rowsToLoad);
+  const singlePlaylist = rows.length === 1;
+  const playlists = usePlaylists(rows, rowsToLoad, singlePlaylist ? PLAYLIST_LIMIT_MAX : undefined);
 
   useEffect(() => {
     // reset row count when the page changes
@@ -56,6 +58,23 @@ const ShelfList = ({ rows }: Props) => {
     return <ErrorPage title={t('empty_shelves_heading')} message={t('empty_shelves_description')} />;
   }
 
+  if (singlePlaylist) {
+    if (!playlists[0].data) return;
+
+    return (
+      <section className={classNames(styles.shelfContainer, styles.grid)}>
+        <CardGrid
+          getUrl={(playlistItem) => mediaURL({ id: playlistItem.mediaid, title: playlistItem.title, playlistId: playlists[0].data?.feedid })}
+          playlist={playlists[0].data}
+          accessModel={accessModel}
+          isLoading={playlists[0].isPlaceholderData || false}
+          isLoggedIn={!!user}
+          hasSubscription={!!subscription}
+        />
+      </section>
+    );
+  }
+
   return (
     <div className={styles.shelfList}>
       <InfiniteScroll
@@ -63,6 +82,7 @@ const ShelfList = ({ rows }: Props) => {
         loadMore={() => setRowsToLoad((current) => current + ROWS_TO_LOAD_STEP)}
         hasMore={rowsToLoad < rows.length}
         loader={<InfiniteScrollLoader key="loader" />}
+        getScrollParent={getScrollParent}
         useWindow={false}
       >
         {rows.slice(0, rowsToLoad).map(({ type, featured, title, custom }, index) => {
@@ -86,7 +106,7 @@ const ShelfList = ({ rows }: Props) => {
               data-testid={testId(`shelf-${isHero ? 'hero' : isFeatured ? 'featured' : type === 'playlist' ? slugify(translatedTitle) : type}`)}
               aria-label={translatedTitle}
             >
-              <Fade duration={250} delay={index * 33} open>
+              <Fade duration={250} delay={index * 33} willChange={!isHero} open>
                 {isHero ? (
                   <HeroShelf loading={isPlaceholderData} error={error} playlist={playlist} />
                 ) : (

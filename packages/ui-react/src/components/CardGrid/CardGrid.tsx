@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import type { Playlist, PlaylistItem } from '@jwp/ott-common/types/playlist';
 import type { AccessModel } from '@jwp/ott-common/types/config';
 import { isLocked } from '@jwp/ott-common/src/utils/entitlements';
+import { hasSupplementaryCardInfo } from '@jwp/ott-common/src/utils/media';
 import { parseAspectRatio, parseTilesDelta } from '@jwp/ott-common/src/utils/collection';
 import useBreakpoint, { Breakpoint, type Breakpoints } from '@jwp/ott-ui-react/src/hooks/useBreakpoint';
 
@@ -11,6 +12,7 @@ import Card from '../Card/Card';
 import InfiniteScrollLoader from '../InfiniteScrollLoader/InfiniteScrollLoader';
 import LayoutGrid from '../LayoutGrid/LayoutGrid';
 import createInjectableComponent from '../../modules/createInjectableComponent';
+import { getScrollParent } from '../../utils/dom';
 
 import styles from './CardGrid.module.scss';
 
@@ -67,6 +69,7 @@ function CardGrid({
   const breakpoint: Breakpoint = useBreakpoint();
   const posterAspect = parseAspectRatio(playlist.cardImageAspectRatio || playlist.shelfImageAspectRatio);
   const visibleTiles = (cols[breakpoint] + parseTilesDelta(posterAspect)) as VisibleTiles;
+  const showSubtitles = playlist.playlist.some(hasSupplementaryCardInfo);
   const [rowCount, setRowCount] = useState(INITIAL_ROW_COUNT);
 
   const defaultLoadMore = () => setRowCount((current) => current + LOAD_ROWS_COUNT);
@@ -91,9 +94,23 @@ function CardGrid({
         posterAspect={posterAspect}
         item={playlistItem}
         headingLevel={headingLevel}
+        hasSubtitle={showSubtitles}
       />
     ),
-    [accessModel, currentCardItem, currentCardLabel, getUrl, hasSubscription, headingLevel, isLoading, isLoggedIn, onCardHover, posterAspect, watchHistory],
+    [
+      accessModel,
+      currentCardItem,
+      currentCardLabel,
+      getUrl,
+      hasSubscription,
+      headingLevel,
+      isLoading,
+      isLoggedIn,
+      onCardHover,
+      posterAspect,
+      watchHistory,
+      showSubtitles,
+    ],
   );
 
   return (
@@ -102,6 +119,7 @@ function CardGrid({
       loadMore={loadMore ?? defaultLoadMore}
       hasMore={hasMore ?? defaultHasMore}
       loader={<InfiniteScrollLoader key="loader" />}
+      getScrollParent={getScrollParent}
       useWindow={false}
     >
       <LayoutGrid

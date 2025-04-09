@@ -51,7 +51,7 @@ function runTestSuite(props: ProviderProps, providerName: string) {
 
     I.click('Payments');
     I.see('Subscription details');
-    I.see('You have no subscription. Complete your subscription to start watching all movies and series.');
+    I.see('You have no subscription.');
     I.see('Complete subscription');
 
     I.see('Payment method');
@@ -73,7 +73,7 @@ function runTestSuite(props: ProviderProps, providerName: string) {
 
     await within(props.monthlyOffer.label, () => {
       I.see('Monthly');
-      I.see('First month free');
+      I.see(props.monthlyOffer.trialDescription!);
       I.see('Cancel anytime');
       I.see('Watch on all devices');
       I.see(props.monthlyOffer.price);
