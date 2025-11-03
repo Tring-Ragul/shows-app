@@ -61,5 +61,6 @@
     "axios": "^0.30.0",
     "cheerio": "1.0.0-rc.12",
     "**/minimatch/brace-expansion": "^1.1.12"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
