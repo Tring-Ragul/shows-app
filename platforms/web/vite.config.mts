@@ -130,7 +130,7 @@ export default ({ mode, command }: ConfigEnv): UserConfigExport => {
     mode: mode,
     assetsInclude: mode === 'test' ? ['**/*.xml'] : [],
     build: {
-      outDir: '/',
+      outDir: './../../',
       cssCodeSplit: false,
       sourcemap: true,
       minify: true,
