@@ -30,7 +30,6 @@ jobs:
       # Move build output to the repo root
       - name: Move build output to home directory
         run: |
-          rm -rf ../../build
           mv build ../../build
 
       - name: Commit and push code changes
