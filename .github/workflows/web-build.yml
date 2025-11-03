@@ -1,4 +1,4 @@
-name: Web - Build - Start Test Server
+name: Web - Build and Commit
 
 on:
   workflow_dispatch:
@@ -13,6 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -24,3 +26,9 @@ jobs:
 
       - name: Run build command
         run: yarn run start:test
+
+      - name: Commit and push build output
+        run: |
+          git add .
+          git commit -m "chore: update build output [skip ci]" || echo "No changes to commit"
+          git push
