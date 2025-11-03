@@ -27,8 +27,14 @@ jobs:
       - name: Run build command
         run: yarn build
 
+      # Move build output to the repo root
+      - name: Move build output to home directory
+        run: |
+          rm -rf ../../build
+          mv build ../../build
+
       - name: Commit and push code changes
-        working-directory: ./   # go back to repo root for git
+        working-directory: ./   # go back to repo root
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
