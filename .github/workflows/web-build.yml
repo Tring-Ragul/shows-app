@@ -1,0 +1,26 @@
+name: Web - Build - Start Test Server
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./platforms/web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run build command
+        run: yarn run start:test
